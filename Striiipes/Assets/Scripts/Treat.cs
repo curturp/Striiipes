@@ -5,7 +5,6 @@ using UnityEngine;
 public class Treat : MonoBehaviour
 {
     [SerializeField] private BoxCollider2D gridArea;
-
     [SerializeField] private Collider2D player;
 
     private void Start()
@@ -25,7 +24,7 @@ public class Treat : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other == player)
+        if (other == player || other.tag == "Segments")
         {
             RandomizePosition();
         }

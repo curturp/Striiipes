@@ -4,51 +4,61 @@ using UnityEngine;
 
 public class Stripes : MonoBehaviour
 {
+    #region Variables
+    //Accessibility
+    [Header("Accessibility Stuff")]
+    [SerializeField][Range(2, 6)] private int initialSize = 3;
+    [SerializeField][Range(0.02f, 0.5f)] private float baseGameSpeed;
+
     //Movement Variables
     private Vector2 direction = Vector2.zero;
+    private Vector2 rayDirection;
     private bool goingLeft = false;
     private bool goingRight = false;
     private bool goingUp = false;
     private bool goingDown = false;
 
     //Body Segments
-    private List<Transform> segments = new List<Transform>();
-    [SerializeField] private Transform segmentPrefab;
-    [SerializeField] private int initialSize = 3;
+    [Header("Body Segments")]    
+    [SerializeField] private Transform segmentPrefab;    
     [SerializeField] private Sprite stripesButtSprite;
     [SerializeField] private Sprite stripesBodySprite;
+    private List<Transform> segments = new List<Transform>();
 
-    //Collisions
+    //Collision
+    [Header("Collision Detectors")]
     [SerializeField] private GameObject treat;
     [SerializeField] private Collider2D treatCollider;
-    //[SerializeField] private float deathTimer = 2;
+    private bool isColliding = false;
+
+    //Death Variables
+    [Header("Death Variables")]
+    [SerializeField] [Range(2, 10)] private float baseDeathTimer = 5;
+    private float deathTimer;
+    [SerializeField] [Range(0, 4)] private int baseLivesCount = 1;
+    private int livesCount;
+    [SerializeField] [Range(2, 10)] private float baseInvincibilityTimer = 5;
+    private float invincibilityTimer;
+    private bool isInvincible = false;
+    #endregion
 
     private void Start()
     {
         ResetState();
-        for (int i = 1; i < initialSize; i++)
-        {
-            segments[i].position = (Vector2)segments[i - 1].position - new Vector2(0, 1);
-        }
     }
 
     private void Update()
     {
-        Controls();
+        Controls();        
         SpriteSwap();
+        CollisionDetection();
+        DeathMethod();
+        InvincibilityState();
     }
 
     private void FixedUpdate()
     {
-        if (direction != Vector2.zero)
-        {
-            for (int i = segments.Count - 1; i > 0; i--)
-            {
-                segments[i].position = segments[i - 1].position;
-            }
-        }
-        
-        Movement();
+        Movement();               
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -64,35 +74,55 @@ public class Stripes : MonoBehaviour
         if (!goingRight && (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)))
         {
             direction = Vector2.left;
+            rayDirection = Vector2.left;
             goingLeft = true;
             goingUp = false;
             goingDown = false;
         }
-        if (!goingLeft && (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)))
+        else if (!goingLeft && (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)))
         {
             direction = Vector2.right;
+            rayDirection = Vector2.right;
             goingRight = true;
             goingUp = false;
             goingDown = false;
         }
-        if (!goingDown && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)))
+        else if (!goingDown && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)))
         {
             direction = Vector2.up;
+            rayDirection = Vector2.up;
             goingUp = true;
             goingRight = false;
             goingLeft = false;
         }
-        if (!goingUp && (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)))
+        else if (!goingUp && (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)))
         {
             direction = Vector2.down;
+            rayDirection = Vector2.down;
             goingDown = true;
             goingRight = false;
             goingLeft = false;
+        }
+        else if (Input.GetKey(KeyCode.F))
+        {
+            direction = Vector2.zero;
+            goingDown = false;
+            goingUp = false;
+            goingLeft = false;
+            goingRight = false;
         }
     }
 
     private void Movement()
     {
+        if (direction != Vector2.zero)
+        {
+            for (int i = segments.Count - 1; i > 0; i--)
+            {
+                segments[i].position = segments[i - 1].position;
+            }
+        }
+
         // Move According to Player Input
         this.transform.position = new Vector3(
             Mathf.Round(this.transform.position.x) + direction.x,
@@ -100,12 +130,84 @@ public class Stripes : MonoBehaviour
             0.0f);
     }
 
+    private void CollisionDetection()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(((Vector2)transform.position + rayDirection), rayDirection);
+        Debug.DrawRay(transform.position, direction, Color.green);
+
+        if (hit.collider != null)
+        {
+            if (isInvincible == true)
+            {
+                if (hit.distance < .5f && hit.collider.tag == "Wall")
+                {
+                    isColliding = true;
+                }
+                else isColliding = false;
+            }
+            else if (isInvincible == false)
+            {
+                if (hit.distance < .5f && (hit.collider.tag == "Wall" || hit.collider.tag == "Segments"))
+                {
+                    isColliding = true;
+                }
+                else isColliding = false;
+            }            
+        }
+        else isColliding = false;
+
+        if (isColliding == true)
+        {
+            direction = Vector2.zero;
+        }
+    }
+
+    private void DeathMethod()
+    {
+        if (isColliding == true && isInvincible == false)
+        {
+            deathTimer -= Time.deltaTime;
+
+            if (deathTimer <= 0)
+            {
+                if (livesCount != 0)
+                {
+                    livesCount -= 1;
+                    Debug.Log("You Lost A Life! Lives Left: " + livesCount);
+                    isInvincible = true;                    
+                }
+                else if (livesCount == 0)
+                {
+                    ResetState();
+                }
+            }            
+        }
+        else if (isColliding == false)
+        {
+            deathTimer = baseDeathTimer;
+        }
+    }
+
+    private void InvincibilityState()
+    {
+        if (isInvincible == true)
+        {
+            invincibilityTimer -= Time.deltaTime;
+
+            if (invincibilityTimer <= 0)
+            {                
+                invincibilityTimer = baseInvincibilityTimer;
+                Debug.Log("You are no longer Invincible. Timer: " + invincibilityTimer);
+                isInvincible = false;
+            }            
+        }
+    }
+
     private void Grow()
     {
         Transform segment = Instantiate(this.segmentPrefab);
         segment.position = segments[segments.Count - 1].position;
-
-        segments.Add(segment);
+        segments.Add(segment);        
     }
 
     private void SpriteSwap()
@@ -129,6 +231,9 @@ public class Stripes : MonoBehaviour
 
     private void ResetState()
     {
+        //Reset Position & Segments List
+        this.transform.position = Vector3.zero;
+
         for (int i = 1; i < segments.Count; i++)
         {
             Destroy(segments[i].gameObject);
@@ -136,22 +241,35 @@ public class Stripes : MonoBehaviour
         segments.Clear();
         segments.Add(this.transform);
 
-
         for (int i = 1; i < this.initialSize; i++)
         {
             segments.Add(Instantiate(this.segmentPrefab));
         }
 
-        this.transform.position = Vector3.zero;
+        for (int i = 1; i < initialSize; i++)
+        {
+            segments[i].position = (Vector2)segments[i - 1].position - new Vector2(0, 1);
+        }
+
+        treat.GetComponent<Treat>().RandomizePosition();
+
+        //Reset Direciton variables;
+        
         direction = Vector2.zero;
+        rayDirection = Vector2.zero;
+        goingUp = true;
+        goingDown = false;
         goingLeft = false;
         goingRight = false;
-        goingUp = false;
-        goingDown = false;
-    }
+        
 
-    private void RandomizeTreat()
-    {
-        treat.GetComponent<Treat>().RandomizePosition();
+        //Reset Death Variables
+        deathTimer = baseDeathTimer;
+        livesCount = baseLivesCount;
+        invincibilityTimer = baseInvincibilityTimer;
+        isInvincible = false;
+
+        //Reset Game Speed
+        Time.fixedDeltaTime = baseGameSpeed;
     }
 }
