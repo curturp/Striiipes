@@ -402,9 +402,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1257161058}
+  - component: {fileID: 1257161055}
   - component: {fileID: 1257161057}
   - component: {fileID: 1257161056}
-  - component: {fileID: 1257161055}
   m_Layer: 0
   m_Name: Stripes
   m_TagString: Untagged
@@ -424,13 +424,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88937de0ee10b7c4caa6ab0c3b715a3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialSize: 6
-  gameSpeed: 0.101
+  initialSize: 3
+  baseGameSpeed: 0.12
   segmentPrefab: {fileID: 1565540105751412747, guid: acd45b3c4944fa74081d9252db8704b2, type: 3}
   stripesButtSprite: {fileID: 21300000, guid: 13ae88dddd63af54eadf06dbc3372594, type: 3}
   stripesBodySprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
   treat: {fileID: 2036961507}
   treatCollider: {fileID: 671488960}
+  baseDeathTimer: 2
+  baseLivesCount: 1
+  baseInvincibilityTimer: 2
 --- !u!50 &1257161056
 Rigidbody2D:
   serializedVersion: 4
@@ -650,7 +653,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1809314257}
   - component: {fileID: 1809314256}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: GridArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}

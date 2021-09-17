@@ -33,11 +33,11 @@ public class Stripes : MonoBehaviour
 
     //Death Variables
     [Header("Death Variables")]
-    [SerializeField] [Range(2, 10)] private float baseDeathTimer = 5;
+    [SerializeField] [Range(.5f, 5)] private float baseDeathTimer = 5;
     private float deathTimer;
     [SerializeField] [Range(0, 4)] private int baseLivesCount = 1;
     private int livesCount;
-    [SerializeField] [Range(2, 10)] private float baseInvincibilityTimer = 5;
+    [SerializeField] [Range(.5f, 5)] private float baseInvincibilityTimer = 5;
     private float invincibilityTimer;
     private bool isInvincible = false;
     #endregion
@@ -174,7 +174,8 @@ public class Stripes : MonoBehaviour
                 {
                     livesCount -= 1;
                     Debug.Log("You Lost A Life! Lives Left: " + livesCount);
-                    isInvincible = true;                    
+                    isInvincible = true;
+                    direction = rayDirection;
                 }
                 else if (livesCount == 0)
                 {
@@ -215,7 +216,7 @@ public class Stripes : MonoBehaviour
         //Get Last Segment and set the correct sprite
         Transform lastSegment = segments[segments.Count - 1];
         SpriteRenderer lastSegmentSprite = lastSegment.GetComponentInChildren<SpriteRenderer>();
-        lastSegmentSprite.transform.localScale = new Vector3(0.145f, 0.145f, 0f);
+        lastSegmentSprite.transform.localScale = new Vector3(0.15f, 0.15f, 0f);
         lastSegmentSprite.sprite = stripesButtSprite;
         lastSegmentSprite.sortingOrder = 2;
 
