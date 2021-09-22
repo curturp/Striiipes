@@ -278,11 +278,6 @@ BoxCollider2D:
   m_CorrespondingSourceObject: {fileID: 7208860343036755209, guid: 1d503f8faf251a1498db72c124299805, type: 3}
   m_PrefabInstance: {fileID: 5810741883402928117}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &884790285 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3182840489649716952, guid: 1d503f8faf251a1498db72c124299805, type: 3}
-  m_PrefabInstance: {fileID: 5810741883402928117}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1004598293
 GameObject:
   m_ObjectHideFlags: 0
@@ -316,7 +311,7 @@ Transform:
   - {fileID: 1244807625}
   - {fileID: 338731551}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1056687408 stripped
 Transform:
@@ -405,7 +400,8 @@ GameObject:
   - component: {fileID: 1257161055}
   - component: {fileID: 1257161057}
   - component: {fileID: 1257161056}
-  m_Layer: 0
+  - component: {fileID: 1257161059}
+  m_Layer: 2
   m_Name: Stripes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -425,13 +421,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialSize: 3
-  baseGameSpeed: 0.12
+  baseGameSpeed: 0.4
+  stripesHeadRenderer: {fileID: 1394089802}
+  stripesHeadUp: {fileID: 21300000, guid: bad9f305d01f7c54dbe4f57875d431e2, type: 3}
+  stripesHeadDown: {fileID: 21300000, guid: 392722175f5ecc847a7985e9ef747901, type: 3}
+  stripesHeadHorizontal: {fileID: 21300000, guid: 8bd7e29c206872741ae896b90ab3e43f, type: 3}
   segmentPrefab: {fileID: 1565540105751412747, guid: acd45b3c4944fa74081d9252db8704b2, type: 3}
-  stripesButtSprite: {fileID: 21300000, guid: 13ae88dddd63af54eadf06dbc3372594, type: 3}
-  stripesBodySprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
+  stripesBodySprites:
+  - {fileID: 21300000, guid: 5cd79ac4b27bf6e4f91e0ed60773ff7f, type: 3}
+  - {fileID: 21300000, guid: 7b0d852edd17b9d43aa5b08d09744b35, type: 3}
+  - {fileID: 21300000, guid: f0a6aa43220293e40ab2352c8a9d123d, type: 3}
+  stripesButtUp: {fileID: 21300000, guid: ff60306a477adfe47830eb21724e59bc, type: 3}
+  stripesButtDown: {fileID: 21300000, guid: 6f5a08fa56451fe40879a39ba00fd5dc, type: 3}
+  stripesButtHorizontal: {fileID: 21300000, guid: 04b13c0a5977df8459af92a143da6209, type: 3}
   treat: {fileID: 2036961507}
   treatCollider: {fileID: 671488960}
-  baseDeathTimer: 2
+  baseDeathTimer: 0.5
   baseLivesCount: 1
   baseInvincibilityTimer: 2
 --- !u!50 &1257161056
@@ -472,8 +477,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.2, y: 0.2}
-    newSize: {x: 0.2, y: 0.2}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -494,8 +499,59 @@ Transform:
   m_Children:
   - {fileID: 1394089801}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &1257161059
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1257161054}
+  m_Enabled: 0
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 7482667652216324306, guid: 48e93eef0688c4a259cb0eddcd8661f7, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &1394089800
 GameObject:
   m_ObjectHideFlags: 0
@@ -506,7 +562,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1394089801}
   - component: {fileID: 1394089802}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: StripeFaceRenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -521,8 +577,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1394089800}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.002, y: 0.14, z: 0}
-  m_LocalScale: {x: 0.145, y: 0.145, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.55, y: 0.55, z: 1}
   m_Children: []
   m_Father: {fileID: 1257161058}
   m_RootOrder: 0
@@ -566,8 +622,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 5d6bf3d29f6fe5f4f89a5be0510bf825, type: 3}
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300000, guid: 392722175f5ecc847a7985e9ef747901, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -777,21 +833,21 @@ PrefabInstance:
       propertyPath: gridArea
       value: 
       objectReference: {fileID: 1809314256}
-    - target: {fileID: 235634695943596417, guid: 1d503f8faf251a1498db72c124299805, type: 3}
-      propertyPath: treatSpriteRenderer
-      value: 
-      objectReference: {fileID: 884790285}
+    - target: {fileID: 747908045057432513, guid: 1d503f8faf251a1498db72c124299805, type: 3}
+      propertyPath: m_SortingOrder
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4693982717697036222, guid: 1d503f8faf251a1498db72c124299805, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4693982717697036222, guid: 1d503f8faf251a1498db72c124299805, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 4693982717697036222, guid: 1d503f8faf251a1498db72c124299805, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4693982717697036222, guid: 1d503f8faf251a1498db72c124299805, type: 3}
       propertyPath: m_LocalPosition.z
@@ -827,27 +883,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6972389537524395625, guid: 1d503f8faf251a1498db72c124299805, type: 3}
       propertyPath: m_SortingOrder
-      value: -2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7112240703815416793, guid: 1d503f8faf251a1498db72c124299805, type: 3}
       propertyPath: m_Name
       value: Treat
       objectReference: {fileID: 0}
-    - target: {fileID: 7208860343036755209, guid: 1d503f8faf251a1498db72c124299805, type: 3}
-      propertyPath: m_Size.x
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 7208860343036755209, guid: 1d503f8faf251a1498db72c124299805, type: 3}
-      propertyPath: m_Size.y
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 7410744191528782387, guid: 1d503f8faf251a1498db72c124299805, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7410744191528782387, guid: 1d503f8faf251a1498db72c124299805, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 747908045057432513, guid: 1d503f8faf251a1498db72c124299805, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 1d503f8faf251a1498db72c124299805, type: 3}

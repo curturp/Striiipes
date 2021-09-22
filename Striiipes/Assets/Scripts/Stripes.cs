@@ -11,7 +11,8 @@ public class Stripes : MonoBehaviour
     [SerializeField][Range(0.02f, 0.5f)] private float baseGameSpeed;
 
     //Movement Variables
-    private Vector2 direction = Vector2.zero;
+    private Vector2 direction;
+    private List<Vector2> inputBuffer = new List<Vector2>();
     private Vector2 rayDirection;
     private bool goingLeft = false;
     private bool goingRight = false;
@@ -19,11 +20,25 @@ public class Stripes : MonoBehaviour
     private bool goingDown = false;
 
     //Body Segments
-    [Header("Body Segments")]    
-    [SerializeField] private Transform segmentPrefab;    
-    [SerializeField] private Sprite stripesButtSprite;
-    [SerializeField] private Sprite stripesBodySprite;
+    [Header("Body Segments")]
+    [SerializeField] private SpriteRenderer stripesHeadRenderer;
+    [SerializeField] private Sprite stripesHeadUp;
+    [SerializeField] private Sprite stripesHeadDown;
+    [SerializeField] private Sprite stripesHeadHorizontal;
+
+    [SerializeField] private Transform segmentPrefab;
+    [SerializeField] private Sprite[] stripesBodySprites;
+
+    [SerializeField] private Sprite stripesButtUp;
+    [SerializeField] private Sprite stripesButtDown;
+    [SerializeField] private Sprite stripesButtHorizontal;
+    private Transform lastSegment;
+    private SpriteRenderer lastSegmentSprite;
+    private float lastSegmentX;
+    private float lastSegmentY;
+
     private List<Transform> segments = new List<Transform>();
+    private bool bodySwapNeeded = false;
 
     //Collision
     [Header("Collision Detectors")]
@@ -44,21 +59,26 @@ public class Stripes : MonoBehaviour
 
     private void Start()
     {
-        ResetState();
+        ResetState();        
     }
 
     private void Update()
     {
-        Controls();        
-        SpriteSwap();
+        Controls();
         CollisionDetection();
         DeathMethod();
-        InvincibilityState();
+        InvincibilityState();        
     }
 
     private void FixedUpdate()
     {
-        Movement();               
+        BufferedActions();
+        Movement();
+    }
+
+    private void LateUpdate()
+    {
+        SpriteSwap();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -66,55 +86,98 @@ public class Stripes : MonoBehaviour
         if (collision == treatCollider)
         {
             Grow();
+            bodySwapNeeded = true;
         }
     }
 
     private void Controls()
     {
-        if (!goingRight && (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
-            direction = Vector2.left;
-            rayDirection = Vector2.left;
-            goingLeft = true;
-            goingUp = false;
-            goingDown = false;
+            if (goingRight == true || direction == Vector2.left)
+            {
+                return;
+            }
+            else
+            {
+                inputBuffer.Add(new Vector2(-1, 0));
+                goingLeft = true;
+                goingRight = false;
+                goingUp = false;
+                goingDown = false;
+            }
         }
-        else if (!goingLeft && (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)))
+
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
         {
-            direction = Vector2.right;
-            rayDirection = Vector2.right;
-            goingRight = true;
-            goingUp = false;
-            goingDown = false;
+            if (goingLeft == true || direction == Vector2.right)
+            {
+                return;
+            }
+            else
+            {
+                inputBuffer.Add(new Vector2(1, 0));
+                goingRight = true;
+                goingLeft = false;
+                goingUp = false;
+                goingDown = false;
+            }
         }
-        else if (!goingDown && (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W)))
+
+        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
         {
-            direction = Vector2.up;
-            rayDirection = Vector2.up;
-            goingUp = true;
-            goingRight = false;
-            goingLeft = false;
+            if (goingDown == true || direction == Vector2.up)
+            {
+                return;
+            }
+            else
+            {
+                inputBuffer.Add(new Vector2(0, 1));
+                goingUp = true;
+                goingDown = false;
+                goingRight = false;
+                goingLeft = false;
+            }
         }
-        else if (!goingUp && (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S)))
+
+        if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
         {
-            direction = Vector2.down;
-            rayDirection = Vector2.down;
-            goingDown = true;
-            goingRight = false;
-            goingLeft = false;
-        }
-        else if (Input.GetKey(KeyCode.F))
+            if (goingUp == true || direction == Vector2.down)
+            {
+                return;
+            }
+            else
+            {
+                inputBuffer.Add(new Vector2(0, -1));
+                goingDown = true;
+                goingUp = false;
+                goingRight = false;
+                goingLeft = false;
+            }
+        }          
+    }
+
+    private void BufferedActions()
+    {
+        if (inputBuffer.Count > 0)
         {
-            direction = Vector2.zero;
-            goingDown = false;
-            goingUp = false;
-            goingLeft = false;
-            goingRight = false;
+            foreach (Vector2 bufferDirection in inputBuffer.ToArray())
+            {
+                rayDirection = bufferDirection;
+                CollisionDetection();
+                if (isColliding == false)
+                {
+                    direction = bufferDirection;
+                }
+                inputBuffer.Remove(bufferDirection);
+
+                break;
+            }
         }
     }
 
     private void Movement()
-    {
+    {        
         if (direction != Vector2.zero)
         {
             for (int i = segments.Count - 1; i > 0; i--)
@@ -132,14 +195,14 @@ public class Stripes : MonoBehaviour
 
     private void CollisionDetection()
     {
-        RaycastHit2D hit = Physics2D.Raycast(((Vector2)transform.position + rayDirection), rayDirection);
-        Debug.DrawRay(transform.position, direction, Color.green);
+        RaycastHit2D hit = Physics2D.Raycast(((Vector2)transform.position), rayDirection);
+        Debug.DrawRay(((Vector2)transform.position), rayDirection, Color.green);
 
         if (hit.collider != null)
         {
             if (isInvincible == true)
             {
-                if (hit.distance < .5f && hit.collider.tag == "Wall")
+                if (hit.distance < 1.5f && hit.collider.tag == "Wall")
                 {
                     isColliding = true;
                 }
@@ -147,9 +210,10 @@ public class Stripes : MonoBehaviour
             }
             else if (isInvincible == false)
             {
-                if (hit.distance < .5f && (hit.collider.tag == "Wall" || hit.collider.tag == "Segments"))
+                if (hit.distance < 1.5f && (hit.collider.tag == "Wall" || hit.collider.tag == "Segments"))
                 {
                     isColliding = true;
+                    Debug.DrawRay(((Vector2)transform.position), rayDirection, Color.red);
                 }
                 else isColliding = false;
             }            
@@ -198,7 +262,7 @@ public class Stripes : MonoBehaviour
             if (invincibilityTimer <= 0)
             {                
                 invincibilityTimer = baseInvincibilityTimer;
-                Debug.Log("You are no longer Invincible. Timer: " + invincibilityTimer);
+                Debug.Log("You are no longer Invincible.");
                 isInvincible = false;
             }            
         }
@@ -213,20 +277,64 @@ public class Stripes : MonoBehaviour
 
     private void SpriteSwap()
     {
-        //Get Last Segment and set the correct sprite
-        Transform lastSegment = segments[segments.Count - 1];
-        SpriteRenderer lastSegmentSprite = lastSegment.GetComponentInChildren<SpriteRenderer>();
-        lastSegmentSprite.transform.localScale = new Vector3(0.15f, 0.15f, 0f);
-        lastSegmentSprite.sprite = stripesButtSprite;
-        lastSegmentSprite.sortingOrder = 2;
+        //Set the Head Sprite
+        if (rayDirection == Vector2.left)
+        {
+            stripesHeadRenderer.sprite = stripesHeadHorizontal;
+            stripesHeadRenderer.flipX = true;
+        }
+        else if (rayDirection == Vector2.right)
+        {
+            stripesHeadRenderer.sprite = stripesHeadHorizontal;
+            stripesHeadRenderer.flipX = false;
+        }
+        else if (rayDirection == Vector2.up)
+        {
+            stripesHeadRenderer.sprite = stripesHeadUp;
+        }
+        else if (rayDirection == Vector2.down)
+        {
+            stripesHeadRenderer.sprite = stripesHeadDown;
+        }
 
-        if (segments.Count >= 3)
+        //Get Last Segment
+        lastSegment = segments[segments.Count - 1];            
+        lastSegmentSprite = lastSegment.GetComponentInChildren<SpriteRenderer>();
+        lastSegmentSprite.transform.localScale = new Vector3(0.55f, 0.55f, 0f);
+        //Set Last Segment
+
+        if (lastSegmentX > lastSegment.position.x)
+        {
+            lastSegmentSprite.sprite = stripesButtHorizontal;
+            lastSegmentSprite.flipX = true;
+        }
+        else if (lastSegmentX < lastSegment.position.x)
+        {
+            lastSegmentSprite.sprite = stripesButtHorizontal;
+            lastSegmentSprite.flipX = false;
+        }
+        else if (lastSegmentY < lastSegment.position.y)
+        {
+            lastSegmentSprite.sprite = stripesButtUp;
+        }
+        else if (lastSegmentY > lastSegment.position.y)
+        {
+            lastSegmentSprite.sprite = stripesButtDown;
+        }
+
+        lastSegmentX = lastSegment.position.x;
+        lastSegmentY = lastSegment.position.y;
+
+
+        //Set the sprite for the body segment
+        if (segments.Count >= 3 && bodySwapNeeded == true)
         {
             Transform bodySegment = segments[segments.Count - 2];
             SpriteRenderer bodySprite = bodySegment.GetComponentInChildren<SpriteRenderer>();
-            bodySprite.transform.localScale = new Vector3(1f, 1f, 0f);
-            bodySprite.sprite = stripesBodySprite;
-            bodySprite.sortingOrder = 0;
+            bodySprite.transform.localScale = new Vector3(.55f, .55f, 0f);
+            int randomIndex = Random.Range(0, stripesBodySprites.Length);
+            bodySprite.sprite = stripesBodySprites[randomIndex];
+            bodySwapNeeded = false;
         }
     }
 
@@ -249,17 +357,20 @@ public class Stripes : MonoBehaviour
 
         for (int i = 1; i < initialSize; i++)
         {
-            segments[i].position = (Vector2)segments[i - 1].position - new Vector2(0, 1);
+            segments[i].position = (Vector2)segments[i - 1].position - new Vector2(0, -1);
         }
+
+        SpriteSwap();
+        lastSegmentSprite.sprite = stripesButtDown;
 
         treat.GetComponent<Treat>().RandomizePosition();
 
         //Reset Direciton variables;
         
         direction = Vector2.zero;
-        rayDirection = Vector2.zero;
-        goingUp = true;
-        goingDown = false;
+        rayDirection = Vector2.down;
+        goingUp = false;
+        goingDown = true;
         goingLeft = false;
         goingRight = false;
         
